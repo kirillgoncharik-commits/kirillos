@@ -1,0 +1,15 @@
+{
+  "name": "kirillos",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "build": "node scripts/build.mjs",
+    "dev": "wrangler dev",
+    "deploy": "npm test && npm run build && wrangler deploy",
+    "encrypt": "node scripts/encrypt-snapshot.mjs"
+  },
+  "devDependencies": { "wrangler": "4.155.0" },
+  "engines": { "node": ">=22" }
+}

@@ -1,0 +1,15 @@
+import {readFileSync,writeFileSync} from 'node:fs';
+import {randomBytes,publicEncrypt,createCipheriv,constants,createHash} from 'node:crypto';
+import {validateSnapshot} from '../src/model.mjs';
+const input = process.argv[2];
+const output = process.argv[3] || 'src/snapshot.enc.json';
+const raw = input ? readFileSync(input) : readFileSync(0);
+const data = validateSnapshot(JSON.parse(raw));
+const publicKey = readFileSync(new URL('../config/snapshot-public.pem',import.meta.url),'utf8');
+const key = randomBytes(32), iv = randomBytes(12);
+const cipher = createCipheriv('aes-256-gcm',key,iv);
+cipher.setAAD(Buffer.from(data.generation));
+const payload = Buffer.concat([cipher.update(JSON.stringify(data)),cipher.final(),cipher.getAuthTag()]);
+const encrypted = {format:'kirillos-envelope-v1',algorithm:'RSA-OAEP-256+A256GCM',generation:data.generation,keyId:createHash('sha256').update(publicKey).digest('hex').slice(0,16),iv:iv.toString('base64'),wrappedKey:publicEncrypt({key:publicKey,oaepHash:'sha256',padding:constants.RSA_PKCS1_OAEP_PADDING},key).toString('base64'),ciphertext:payload.toString('base64')};
+writeFileSync(output,JSON.stringify(encrypted,null,2)+'\n');
+process.stderr.write(`Encrypted snapshot ${data.generation}; ${data.projects.length} projects; ${data.tasks.length} tasks.\n`);

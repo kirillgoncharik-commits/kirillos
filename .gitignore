@@ -1,0 +1,11 @@
+node_modules/
+.wrangler/
+.dev.vars*
+.env*
+!.env.example
+private/
+*.pem
+!config/snapshot-public.pem
+*.key
+coverage/
+playwright-report/
