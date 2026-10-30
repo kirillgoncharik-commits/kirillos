@@ -3,6 +3,9 @@ import assert from 'node:assert/strict';
 import {assemble} from '../scripts/assemble-snapshot.mjs';
 
 const registry={projects:[{id:'a'},{id:'b'}],people:[],memberships:[],goals:[],documents:[],decisions:[],alerts:[]};
+test('incomplete source without a private baseline stops publication',()=>{
+  assert.throws(()=>assemble({registry,boards:[]}),/Previous private snapshot required/);
+});
 test('partial source retains its last known tasks and reports failure',()=>{
   const previous={tasks:[{id:'old',projectId:'b',title:'Retain me'}],sources:[{id:'trello-b',lastSuccessAt:'2026-10-28T08:00:00Z'}]};
   const result=assemble({registry,previous,boards:[{projectId:'a',complete:true,observedAt:'2026-10-29T08:00:00Z',lists:[]},{projectId:'b',complete:false,lists:[]}]});

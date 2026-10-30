@@ -11,7 +11,10 @@ export function validateSnapshot(data) {
   const people = new Set(data.people.map(p=>p.id));
   const emails = data.people.map(p=>email(p.email)).filter(Boolean);
   if (new Set(emails).size !== emails.length) throw new Error('Duplicate person email');
-  for (const m of data.memberships) if (!projects.has(m.projectId) || !people.has(m.personId)) throw new Error('Invalid membership');
+  for (const m of data.memberships) {
+    if (!projects.has(m.projectId) || !people.has(m.personId)) throw new Error('Invalid membership');
+    if (m.active !== undefined && typeof m.active !== 'boolean') throw new Error('Membership active must be a boolean');
+  }
   const membershipKeys = data.memberships.map(m=>m.projectId+':'+m.personId);
   if (new Set(membershipKeys).size !== membershipKeys.length) throw new Error('Duplicate membership');
   for (const name of ['tasks','goals','documents','decisions','sources','alerts']) for (const item of data[name]) if (item.projectId && !projects.has(item.projectId)) throw new Error('Invalid project reference: '+name);

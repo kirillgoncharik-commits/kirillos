@@ -11,8 +11,9 @@ export function assemble(input, now=new Date().toISOString()) {
   for(const p of r.projects){
     const b=input.boards.find(x=>x.projectId===p.id);
     if(!b || b.complete!==true){
+      if(!previous)throw new Error('Previous private snapshot required for incomplete board: '+p.id);
       tasks.push(...(previous?.tasks||[]).filter(t=>t.projectId===p.id));
-      const old=previous?.sources.find(s=>s.id==='trello-'+p.id);
+      const old=previous?.sources?.find(s=>s.id==='trello-'+p.id);
       sources.push({id:'trello-'+p.id,projectId:p.id,name:'Trello',status:'error',observedAt:now,lastSuccessAt:old?.lastSuccessAt||''});
       continue;
     }
